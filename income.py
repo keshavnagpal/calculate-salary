@@ -23,20 +23,20 @@ class Income(object):
         self.pf = self.basic * 0.12 * 2
         self.hra = self.basic * 0.4 if metro_city is False else self.basic * 0.5
 
-    # fmt: off
     def show_income(self):
         tax = self._get_tax()
         if tax:
-            tax += self._get_cess(tax) # wtf, tax on tax
+            tax += self._get_cess(tax)  # wtf, tax on tax
+            # fmt: off
             print(f"Gross:                               {int(self.gross):,}")
             print("------------------------------------------------")
-            print(f"Total Tax to be paid:                {int(tax):,}")
+            print(f"Total Tax (including cess):          {int(tax):,}")
             print("------------------------------------------------")
             print(f"Max income possible (cash + pf):     {int(self.gross - tax):,}")
             print("------------------------------------------------")
             print(f"Monthly in-hand:                     {int((self.gross - (tax + self.pf))/12):,}")
             print("------------------------------------------------")
-    # fmt: on
+            # fmt: on
 
     def taxable(self):
         # pf > 2.5 lakh one side is taxable ~ employee + employer = 5L
@@ -84,7 +84,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-m",
         "--metro",
-        help="Do you stay in a metro city, write yes if you do",
+        help="'yes' if you stay in a metro city, 'no' otherwise",
         required=False,
     )
     args = vars(parser.parse_args())
