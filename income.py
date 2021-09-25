@@ -28,13 +28,14 @@ class Income(object):
         if tax:
             tax += self._get_cess(tax)  # wtf, tax on tax
         # fmt: off
+        mih = self.monthly_in_hand(tax)
         print(f"Gross:                               {int(self.gross):,}")
         print("------------------------------------------------")
         print(f"Total Tax (including cess):          {int(tax):,}")
         print("------------------------------------------------")
         print(f"Max income possible (cash + pf):     {int(self.gross - tax):,}")
         print("------------------------------------------------")
-        print(f"Monthly in-hand:                     {int((self.gross - (tax + self.pf))/12):,}")
+        print(f"Monthly (cash + pf):                 {mih + int(self.pf/12):,} ( {mih:,} + {int(self.pf/12):,} )")
         print("------------------------------------------------")
         # fmt: on
 
@@ -44,6 +45,12 @@ class Income(object):
         ess = lakh(1.5) - pf / 2 if pf / 2 < lakh(1.5) else 0
         taxable = self.gross - (pf + self.hra + ess + self.standard + self.medical)
         return taxable if taxable > 0 else 0
+
+    def monthly_in_hand(self, tax):
+        if not tax:
+            return int(self.gross / 12)
+
+        return int((self.gross - (tax + self.pf)) / 12)
 
     def _get_tax(self):
         income = self.taxable()
