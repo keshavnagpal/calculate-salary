@@ -5,7 +5,7 @@ Command line script to calculate taxes and in hand salary
 ## Usage
 
 ```
-usage: income.py [-h] -s SALARY [-m METRO]
+usage: python3 income.py [-h] -s SALARY [-m METRO]
 
 Calculates your taxes and in hand income
 
