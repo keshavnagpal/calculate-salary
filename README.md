@@ -16,7 +16,7 @@ optional arguments:
                         Annual Salary
 
   -m METRO, --metro METRO
-                        Do you stay in a metro city, write yes if you do
+                        Do you stay in a metro city, write yes if you do, otherwise write no
 ```
 
 ## Note:
