@@ -40,12 +40,13 @@ class Income(object):
         print(self.strings['pf'])
         print(f"{self.strings['gross']}{int(self.gross):,}\n")
 
+        print("-----------------Old Regime-------------------")
         self.show_income(self._get_tax_old_regime())
+        print("-----------------New Regime-------------------")
         self.show_income(self._get_tax_new_regime())
 
     def show_income(self, tax):
         mih = self.monthly_in_hand(tax)
-        print("-----------------Old Regime-------------------")
         print(f"{self.strings['tax']}{int(tax):,}")
         print("------------------------------------------------")
         print(f"{self.strings['income']}{int(self.gross - tax):,}")
