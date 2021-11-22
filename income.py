@@ -15,44 +15,62 @@ class Income(object):
     standard = lakh(0.5)
     medical = lakh(0.5)
 
-    def __init__(self, gross, metro_city):
-        print("Metro City: ", metro)
+    def __init__(self, gross, metro_city, pf):
         self.gross = gross
-
         self.basic = gross * 0.5
-        self.pf = self.basic * 0.12 * 2
+        self.pf = self.basic * 0.12 * 2 if pf else 0
         self.hra = self.basic * 0.4 if metro_city is False else self.basic * 0.5
-
-    def show_income(self):
-        tax = self._get_tax()
-        if tax:
-            tax += self._get_cess(tax)  # wtf, tax on tax
         # fmt: off
-        mih = self.monthly_in_hand(tax)
-        print(f"Gross:                               {int(self.gross):,}")
-        print("------------------------------------------------")
-        print(f"Total Tax (including cess):          {int(tax):,}")
-        print("------------------------------------------------")
-        print(f"Max income possible (cash + pf):     {int(self.gross - tax):,}")
-        print("------------------------------------------------")
-        print(f"Monthly (cash + pf):                 {mih + int(self.pf/12):,} ( {mih:,} + {int(self.pf/12):,} )")
-        print("------------------------------------------------")
+        self.strings = {
+            "gross":   "Gross:                               ",
+            "tax":     "Total Tax (including cess):          ",
+            "income":  "Income possible (cash + pf):         ",
+            "monthly": "Monthly (cash + pf):                 ",
+            "metro":  f"Metro City:                          {'Yes' if metro else 'No'}",
+            "pf":     f"PF Inclusive in Salary:              {'Yes' if pf else 'No'}",
+        }
         # fmt: on
 
-    def taxable(self):
+    def show(self):
+        if self.gross > crore(1):
+            print("you should hire a CA")
+            return
+
+        print(self.strings['metro'])
+        print(self.strings['pf'])
+        print(f"{self.strings['gross']}{int(self.gross):,}\n")
+
+        self.show_income(self._get_tax_old_regime())
+        self.show_income(self._get_tax_new_regime())
+
+    def show_income(self, tax):
+        mih = self.monthly_in_hand(tax)
+        print("-----------------Old Regime-------------------")
+        print(f"{self.strings['tax']}{int(tax):,}")
+        print("------------------------------------------------")
+        print(f"{self.strings['income']}{int(self.gross - tax):,}")
+        print("------------------------------------------------")
+        print(f"{self.strings['monthly']}{mih + int(self.pf/12):,} ( {mih:,} + {int(self.pf/12):,} )")
+        print("------------------------------------------------\n")
+
+    def taxable(self, regime=None):
         # pf > 2.5 lakh one side is taxable ~ employee + employer = 5L
         pf = lakh(5) if self.pf > lakh(5) else self.pf
+
+        if regime == 'new':
+            return self.gross - (pf / 2)
+
         ess = lakh(1.5) - pf / 2 if pf / 2 < lakh(1.5) else 0
         taxable = self.gross - (pf + self.hra + ess + self.standard + self.medical)
         return taxable if taxable > 0 else 0
 
     def monthly_in_hand(self, tax):
         if not tax:
-            return int(self.gross / 12)
+            return int(self.gross - self.pf / 12)
 
         return int((self.gross - (tax + self.pf)) / 12)
 
-    def _get_tax(self):
+    def _get_tax_old_regime(self):
         income = self.taxable()
         tax = 0
 
@@ -76,10 +94,51 @@ class Income(object):
         if income < crore(1):
             return tax + (income - lakh(50)) * 0.1
 
-        if income > crore(1):
-            print("you should hire a CA")
+        return 0
+
+    def _get_tax_new_regime(self):
+        income = self.taxable('new')
+        tax = 0
+
+        if income < lakh(5):  # tax exempted by govt
+            return 0
+
+        # 5% slab
+        tax += lakh(2.5) * 0.05
+
+        # 10% slab
+        if income < lakh(7.5):
+            return tax + (income - lakh(5)) * 0.1
+        tax += lakh(2.5) * 0.1
+
+        # 15% slab
+        if income < lakh(10):
+            return tax + (income - lakh(7.5)) * 0.15
+        tax += lakh(2.5) * 0.15
+
+        # 20% slab
+        if income < lakh(12.5):
+            return tax + (income - lakh(10)) * 0.2
+        tax += lakh(2.5) * 0.2
+
+        # 25% slab
+        if income < lakh(15):
+            return tax + (income - lakh(12.5)) * 0.25
+        tax += lakh(2.5) * 0.25
+
+        # 30% slab
+        if income < lakh(50):
+            return tax + (income - lakh(15)) * 0.3
+        tax += lakh(35) * 0.3
+
+        # 10% surcharge
+        if income < crore(1):
+            return tax + (income - lakh(50)) * 0.1
+
+        return 0
 
     def _get_cess(self, tax):
+        # tax on tax
         return tax * 0.04
 
 
@@ -94,10 +153,18 @@ if __name__ == "__main__":
         help="'yes' if you stay in a metro city, 'no' otherwise",
         required=False,
     )
+    parser.add_argument(
+        "-pf",
+        help="'yes' if your pf is inclusive in the salary mentioned, 'no' otherwise",
+        required=False,
+    )
     args = vars(parser.parse_args())
     metro = (
         False if args.get("metro") and args["metro"].lower() in {"no", "n"} else True
     )
+    pf = (
+        False if args.get("pf") and args["pf"].lower() in {"no", "n"} else True
+    )
 
-    i = Income(float(args["salary"]), metro)
-    i.show_income()
+    i = Income(float(args["salary"]), metro, pf)
+    i.show()
