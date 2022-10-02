@@ -26,7 +26,7 @@ class Income(object):
             "tax":     "Total Tax (including cess):          ",
             "income":  "Income possible (cash + pf):         ",
             "monthly": "Monthly (cash + pf):                 ",
-            "metro":  f"Metro City:                          {'Yes' if metro else 'No'}",
+            "metro":  f"Metro City:                          {'Yes' if metro_city else 'No'}",
             "pf":     f"PF Inclusive in Salary:              {'Yes' if pf else 'No'}",
         }
         # fmt: on
@@ -67,7 +67,7 @@ class Income(object):
 
     def monthly_in_hand(self, tax):
         if not tax:
-            return int(self.gross - self.pf / 12)
+            return int((self.gross - self.pf) / 12)
 
         return int((self.gross - (tax + self.pf)) / 12)
 
