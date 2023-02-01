@@ -98,34 +98,30 @@ class Income(object):
         return 0
 
     def _get_tax_new_regime(self):
+        # as per 2023 budget
         income = self.taxable('new')
         tax = 0
 
-        if income < lakh(5):  # tax exempted by govt
+        if income < lakh(7):  # tax exempted by govt
             return 0
 
         # 5% slab
-        tax += lakh(2.5) * 0.05
+        tax += lakh(3) * 0.05
 
         # 10% slab
-        if income < lakh(7.5):
-            return tax + (income - lakh(5)) * 0.1
-        tax += lakh(2.5) * 0.1
+        if income < lakh(9):
+            return tax + (income - lakh(6)) * 0.1
+        tax += lakh(3) * 0.1
 
         # 15% slab
-        if income < lakh(10):
-            return tax + (income - lakh(7.5)) * 0.15
-        tax += lakh(2.5) * 0.15
+        if income < lakh(12):
+            return tax + (income - lakh(9)) * 0.15
+        tax += lakh(3) * 0.15
 
         # 20% slab
-        if income < lakh(12.5):
-            return tax + (income - lakh(10)) * 0.2
-        tax += lakh(2.5) * 0.2
-
-        # 25% slab
         if income < lakh(15):
-            return tax + (income - lakh(12.5)) * 0.25
-        tax += lakh(2.5) * 0.25
+            return tax + (income - lakh(12)) * 0.2
+        tax += lakh(3) * 0.2
 
         # 30% slab
         if income < lakh(50):
