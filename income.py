@@ -18,8 +18,12 @@ class Income(object):
     def __init__(self, gross, metro_city, pf):
         self.gross = gross
         self.basic = gross * 0.5
-        self.pf = self.basic * 0.12 * 2 if pf else 0
         self.hra = self.basic * 0.4 if metro_city is False else self.basic * 0.5
+
+        self.pf = self.basic * 0.12 * 2 if pf else 0
+        # pf > 2.5 lakh one side is taxable ~ employee + employer = 5L
+        self.pf = lakh(5) if self.pf > lakh(5) else self.pf
+
         # fmt: off
         self.strings = {
             "gross":   "Gross:                               ",
@@ -55,14 +59,11 @@ class Income(object):
         print("------------------------------------------------\n")
 
     def taxable(self, regime=None):
-        # pf > 2.5 lakh one side is taxable ~ employee + employer = 5L
-        pf = lakh(5) if self.pf > lakh(5) else self.pf
-
         if regime == 'new':
-            return self.gross - (pf / 2)
+            return self.gross - (self.pf / 2)
 
-        ess = lakh(1.5) - pf / 2 if pf / 2 < lakh(1.5) else 0
-        taxable = self.gross - (pf + self.hra + ess + self.standard + self.medical)
+        ess = lakh(1.5) - self.pf / 2 if self.pf / 2 < lakh(1.5) else 0
+        taxable = self.gross - (self.pf + self.hra + ess + self.standard + self.medical)
         return taxable if taxable > 0 else 0
 
     def monthly_in_hand(self, tax):
