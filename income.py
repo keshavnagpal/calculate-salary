@@ -93,8 +93,9 @@ class Income(object):
         tax += lakh(40) * 0.3
 
         # 10% surcharge
+        # TODO: include marginal relief
         if income < crore(1):
-            return tax + (income - lakh(50)) * 0.1
+            return tax + tax * 0.1
 
         return 0
 
@@ -130,8 +131,9 @@ class Income(object):
         tax += lakh(35) * 0.3
 
         # 10% surcharge
+        # TODO: include marginal relief
         if income < crore(1):
-            return tax + (income - lakh(50)) * 0.1
+            return tax + tax * 0.1
 
         return 0
 
