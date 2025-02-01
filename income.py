@@ -120,19 +120,19 @@ class Income(object):
 
         tax += lakh(4) * 0.15
 
-        # 20% slab
+        # 20% slab 16 - 20 lakh
         if income < lakh(20):
             return tax + (income - lakh(16)) * 0.2
 
         tax += lakh(4) * 0.2
 
-        # 25% slab
+        # 25% slab 20 - 24 lakh
         if income < lakh(24):
             return tax + (income - lakh(20)) * 0.25
 
         tax += lakh(4) * 0.25
 
-        # 30% slab
+        # 30% slab 24 lakh above
         if income < lakh(50):
             return tax + (income - lakh(24)) * 0.3
 
