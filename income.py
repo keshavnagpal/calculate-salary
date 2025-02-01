@@ -108,39 +108,53 @@ class Income(object):
         if income < lakh(12):  # tax exempted by govt
             return 0
 
-        # 5% slab 4 - 8 lakh
+        # 5% slab 4-8L
         tax += lakh(4) * 0.05
+        income -= lakh(4)
 
-        # 10% slab 8 - 12 lakh
+        # 10% slab 8-12L
         tax += lakh(4) * 0.1
+        income -= lakh(4)
 
-        # 15% slab 12 - 16 lakh
-        if income < lakh(16):
-            return tax + (income - lakh(8)) * 0.15
+        # 15% slab 12-16L
+        if income < lakh(4):
+            tax = tax + income * 0.15
+            return tax
+
 
         tax += lakh(4) * 0.15
+        income -= lakh(4)
 
-        # 20% slab 16 - 20 lakh
-        if income < lakh(20):
-            return tax + (income - lakh(16)) * 0.2
+        # 20% slab 16-20L
+        if income < lakh(4):
+            tax = tax + income * 0.2
+            return tax
+
 
         tax += lakh(4) * 0.2
+        income -= lakh(4)
 
-        # 25% slab 20 - 24 lakh
-        if income < lakh(24):
-            return tax + (income - lakh(20)) * 0.25
+        # 25% slab 20-24L
+        if income < lakh(4):
+            tax = tax + income * 0.25
+            return tax
+
 
         tax += lakh(4) * 0.25
+        income -= lakh(4)
 
-        # 30% slab 24 lakh above
+        # 30% slab 24-50L
         if income < lakh(50):
-            return tax + (income - lakh(24)) * 0.3
+            tax = tax + income * 0.3
+            return tax
+
 
         tax += lakh(26) * 0.3
+        income -= lakh(26)
 
         # 10% surcharge
         # TODO: include marginal relief
-        if income < crore(1):
+        if income < lakh(50):
             return tax + tax * 0.1
 
         return 0
