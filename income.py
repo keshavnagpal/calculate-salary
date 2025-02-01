@@ -13,6 +13,7 @@ def crore(x):
 class Income(object):
     ess = lakh(1.5)
     standard = lakh(0.5)
+    standard_new_regime = lakh(0.75)
     medical = lakh(0.5)
 
     def __init__(self, gross, metro_city, pf):
@@ -20,9 +21,8 @@ class Income(object):
         self.basic = gross * 0.5
         self.hra = self.basic * 0.4 if metro_city is False else self.basic * 0.5
 
-        self.pf = self.basic * 0.12 * 2 if pf else 0
-        # pf > 2.5 lakh one side is taxable ~ employee + employer = 5L
-        self.pf = lakh(5) if self.pf > lakh(5) else self.pf
+        self.pf_employee = self.pf_employer = self.basic * 0.12 if pf else 0
+        self.pf = self.pf_employee + self.pf_employer
 
         # fmt: off
         self.strings = {
@@ -60,10 +60,11 @@ class Income(object):
 
     def taxable(self, regime=None):
         if regime == 'new':
-            return self.gross - (self.pf / 2)
+            return self.gross - (self.pf / 2) - self.standard_new_regime
 
-        ess = lakh(1.5) - self.pf / 2 if self.pf / 2 < lakh(1.5) else 0
-        taxable = self.gross - (self.pf + self.hra + ess + self.standard + self.medical)
+        ess = lakh(1.5) if not self.pf_employee else 0
+        taxable = self.gross - (self.pf_employer + self.hra + ess + self.standard
+                                + self.medical + min(self.pf_employee, lakh(2.5)))
         return taxable if taxable > 0 else 0
 
     def monthly_in_hand(self, tax):
@@ -104,31 +105,38 @@ class Income(object):
         income = self.taxable('new')
         tax = 0
 
-        if income < lakh(7):  # tax exempted by govt
+        if income < lakh(12):  # tax exempted by govt
             return 0
 
-        # 5% slab
-        tax += lakh(3) * 0.05
+        # 5% slab 4 - 8 lakh
+        tax += lakh(4) * 0.05
 
-        # 10% slab
-        if income < lakh(9):
-            return tax + (income - lakh(6)) * 0.1
-        tax += lakh(3) * 0.1
+        # 10% slab 8 - 12 lakh
+        tax += lakh(4) * 0.1
 
-        # 15% slab
-        if income < lakh(12):
-            return tax + (income - lakh(9)) * 0.15
-        tax += lakh(3) * 0.15
+        # 15% slab 12 - 16 lakh
+        if income < lakh(16):
+            return tax + (income - lakh(8)) * 0.15
+
+        tax += lakh(4) * 0.15
 
         # 20% slab
-        if income < lakh(15):
-            return tax + (income - lakh(12)) * 0.2
-        tax += lakh(3) * 0.2
+        if income < lakh(20):
+            return tax + (income - lakh(16)) * 0.2
+
+        tax += lakh(4) * 0.2
+
+        # 25% slab
+        if income < lakh(24):
+            return tax + (income - lakh(20)) * 0.25
+
+        tax += lakh(4) * 0.25
 
         # 30% slab
         if income < lakh(50):
-            return tax + (income - lakh(15)) * 0.3
-        tax += lakh(35) * 0.3
+            return tax + (income - lakh(24)) * 0.3
+
+        tax += lakh(26) * 0.3
 
         # 10% surcharge
         # TODO: include marginal relief
